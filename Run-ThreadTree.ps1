@@ -13,10 +13,12 @@ $VerbosePreference = 'Continue';
 class Thread {
   [powershell] $Thread
   $Handle
+  [string] $Name
 
-  Thread([powershell] $Thread, $Handle) {
+  Thread([powershell] $Thread, $Handle, [string] $Name) {
     $this.Thread = $Thread;
     $this.Handle = $Handle;
+    $this.Name = $Name;
   }
 }
 
@@ -138,7 +140,7 @@ function New-Thread {
   $Thread.AddArgument(${function:\Write-ToFile});
 
   $Jobs.Add(
-    [Thread]::New($Thread, $Thread.BeginInvoke())) | Out-Null;
+    [Thread]::New($Thread, $Thread.BeginInvoke(), $Vertex.Name)) | Out-Null;
 }
 
 New-Thread $root | Out-Null;
@@ -160,7 +162,7 @@ while ($remainingJobs.Count -gt 0) {
 }
 
 $Jobs | ForEach-Object {
-  Write-Verbose "Closing thread $_";
+  Write-Verbose "Closing thread `"$($_.Name)`"";
 
   $_.Thread.EndInvoke($_.Handle) | Out-Null;
   $_.Thread.Dispose() | Out-Null;
